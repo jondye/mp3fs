@@ -52,6 +52,9 @@ private:
     typedef std::map<int,const char*> meta_map_t;
     static const meta_map_t create_meta_map();
     static const meta_map_t metatag_map;
+    typedef std::map<int,const char*> freetext_map_t;
+    static const freetext_map_t create_freetext_map();
+    static const freetext_map_t freetexttag_map;
 };
 
 #endif

@@ -135,12 +135,13 @@ void Mp3Encoder::set_text_tag(const int key, const char* value) {
         return;
     }
 
-    meta_map_t::const_iterator it = metatag_map.find(key);
+    meta_map_t::const_iterator tag = metatag_map.find(key);
+    freetext_map_t::const_iterator texttag = freetexttag_map.find(key);
 
-    if (it != metatag_map.end()) {
-        struct id3_frame* frame = id3_tag_findframe(id3tag, it->second, 0);
+    if (tag != metatag_map.end()) {
+        struct id3_frame* frame = id3_tag_findframe(id3tag, tag->second, 0);
         if (!frame) {
-            frame = id3_frame_new(it->second);
+            frame = id3_frame_new(tag->second);
             id3_tag_attachframe(id3tag, frame);
 
             id3_field_settextencoding(id3_frame_field(frame, 0),
@@ -150,6 +151,24 @@ void Mp3Encoder::set_text_tag(const int key, const char* value) {
         id3_ucs4_t* ucs4 = id3_utf8_ucs4duplicate((id3_utf8_t *)value);
         if (ucs4) {
             id3_field_addstring(id3_frame_field(frame, 1), ucs4);
+            free(ucs4);
+        }
+    /* Handling tags which go in the free text (TXXX) field. */
+    } else if(texttag != freetexttag_map.end()) {
+        struct id3_frame *const frame = id3_frame_new("TXXX");
+        id3_tag_attachframe(id3tag, frame);
+
+        id3_field_settextencoding(id3_frame_field(frame, 0),
+                                  ID3_FIELD_TEXTENCODING_UTF_8);
+        id3_ucs4_t* type = id3_latin1_ucs4duplicate((id3_latin1_t*)texttag->second);
+        if (type) {
+            id3_field_setstring(id3_frame_field(frame, 1), type);
+            free(type);
+        }
+
+        id3_ucs4_t* ucs4 = id3_utf8_ucs4duplicate((id3_utf8_t *)value);
+        if (ucs4) {
+            id3_field_setstring(id3_frame_field(frame, 2), ucs4);
             free(ucs4);
         }
     /* Special handling for track or disc numbers. */
@@ -377,3 +396,31 @@ const Mp3Encoder::meta_map_t Mp3Encoder::create_meta_map() {
 
 const Mp3Encoder::meta_map_t Mp3Encoder::metatag_map
     = Mp3Encoder::create_meta_map();
+
+/*
+ * This function creates the map detailing the freeform text tags
+ * for the standard values in the enum in coders.h. It will be
+ * called only once to set the freetexttag_map static variable.
+ */
+const Mp3Encoder::freetext_map_t Mp3Encoder::create_freetext_map() {
+    freetext_map_t m;
+
+    m[METATAG_MUSICBRAINZ_ALBUMID] = "MusicBrainz Album Id";
+    m[METATAG_MUSICBRAINZ_ARTISTID] = "MusicBrainz Artist Id";
+    m[METATAG_MUSICBRAINZ_ALBUMARTISTID] = "MusicBrainz Album Artist Id";
+    m[METATAG_MUSICBRAINZ_TRMID] = "MusicBrainz TRM Id";
+    m[METATAG_MUSICBRAINZ_DISCID] = "MusicBrainz Disc Id";
+    m[METATAG_MUSICBRAINZ_RELEASEGROUPID] = "MusicBrainz Release Group Id";
+    m[METATAG_MUSICBRAINZ_WORKID] = "MusicBrainz Work Id";
+    m[METATAG_MUSICIP_PUID] = "MusicIP PUID";
+    m[METATAG_RELEASESTATUS] = "MusicBrainz Album Status";
+    m[METATAG_RELEASETYPE] =  "MusicBrainz Album Type";
+    m[METATAG_RELEASECOUNTRY] = "MusicBrainz Album Release Country";
+    m[METATAG_ASIN] = "ASIN";
+    m[METATAG_SCRIPT] = "SCRIPT";
+
+    return m;
+}
+
+const Mp3Encoder::freetext_map_t Mp3Encoder::freetexttag_map
+    = Mp3Encoder::create_freetext_map();
