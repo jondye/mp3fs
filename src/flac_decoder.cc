@@ -225,6 +225,8 @@ const FlacDecoder::meta_map_t FlacDecoder::create_meta_map() {
     m["TRACKTOTAL"] = METATAG_TRACKTOTAL;
     m["DISCNUMBER"] = METATAG_DISCNUMBER;
     m["DISCTOTAL"] = METATAG_DISCTOTAL;
+    m["ISRC"] = METATAG_ISRC;
+    m["MUSICBRAINZ_TRACKID"] = METATAG_MUSICBRAINZ_TRACKID;
 
     return m;
 }

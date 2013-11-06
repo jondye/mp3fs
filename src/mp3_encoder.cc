@@ -24,6 +24,7 @@
 
 #include <cmath>
 #include <cstdlib>
+#include <cstring>
 #include <sstream>
 #include <vector>
 
@@ -189,6 +190,17 @@ void Mp3Encoder::set_text_tag(const int key, const char* value) {
         if (tofree) {
             free(tofree);
         }
+    /* Special handling for MusicBrainz Track Id. */
+    } else if (key == METATAG_MUSICBRAINZ_TRACKID) {
+        struct id3_frame* frame = id3_tag_findframe(id3tag, "UFID", 0);
+        if (!frame) {
+            frame = id3_frame_new("UFID");
+            id3_tag_attachframe(id3tag, frame);
+        }
+
+	const id3_latin1_t schema[] = "http://musicbrainz.org";
+	id3_field_setlatin1(id3_frame_field(frame, 0), schema);
+	id3_field_setbinarydata(id3_frame_field(frame, 1), (id3_byte_t*)value, strlen(value));
     }
 }
 
@@ -358,6 +370,7 @@ const Mp3Encoder::meta_map_t Mp3Encoder::create_meta_map() {
     m[METATAG_ALBUMARTIST] = "TPE2";
     m[METATAG_ENCODER] = "TSSE";
     m[METATAG_TRACKLENGTH] = "TLEN";
+    m[METATAG_ISRC] = "TSRC";
 
     return m;
 }
