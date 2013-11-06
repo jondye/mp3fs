@@ -38,7 +38,7 @@ extern struct mp3fs_params {
 /* Fuse operations struct */
 extern struct fuse_operations mp3fs_ops;
 
-#define mp3fs_debug(f, ...) syslog(LOG_DEBUG, f, ## __VA_ARGS__)
+#define mp3fs_debug(f, ...) if (params.debug) syslog(LOG_DEBUG, f, ## __VA_ARGS__)
 #define mp3fs_info(f, ...) syslog(LOG_INFO, f, ## __VA_ARGS__)
 #define mp3fs_error(f, ...) syslog(LOG_ERR, f, ## __VA_ARGS__)
 
