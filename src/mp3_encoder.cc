@@ -198,7 +198,11 @@ void Mp3Encoder::set_text_tag(const int key, const char* value) {
         if (key == METATAG_TRACKNUMBER || key == METATAG_DISCNUMBER) {
             tempstr << value << lat;
         } else {
-            tempstr << lat << "/" << value;
+            tempstr << lat;
+            /* don't add the total twice */
+            if (strchr((const char*)lat, '/') == NULL) {
+                tempstr << '/' << value;
+            }
         }
         id3_ucs4_t* ucs4 =
             id3_latin1_ucs4duplicate((id3_latin1_t*)tempstr.str().c_str());
@@ -390,6 +394,9 @@ const Mp3Encoder::meta_map_t Mp3Encoder::create_meta_map() {
     m[METATAG_ENCODER] = "TSSE";
     m[METATAG_TRACKLENGTH] = "TLEN";
     m[METATAG_ISRC] = "TSRC";
+    m[METATAG_LABEL] = "TPUB";
+    m[METATAG_LANGUAGE] = "TLAN";
+    m[METATAG_MEDIA] = "TMED";
 
     return m;
 }
@@ -418,6 +425,9 @@ const Mp3Encoder::freetext_map_t Mp3Encoder::create_freetext_map() {
     m[METATAG_RELEASECOUNTRY] = "MusicBrainz Album Release Country";
     m[METATAG_ASIN] = "ASIN";
     m[METATAG_SCRIPT] = "SCRIPT";
+    m[METATAG_ALBUMARTISTSORT] = "ALBUMARTISTSORT";
+    m[METATAG_CATALOGNUMBER] = "CATALOGNUMBER";
+    m[METATAG_BARCODE] = "BARCODE";
 
     return m;
 }
